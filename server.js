@@ -7,9 +7,6 @@ const booksRouter = require('./src/routes/books');
 
 const app = express();
 
-// Connect to DB
-connectDB();
-
 // Middleware
 app.use(morgan('dev'));
 app.use(cors());
@@ -30,6 +27,15 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+
+// Start server only after successful DB connection
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server listening on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Exiting process due to DB connection failure.');
+    process.exit(1);
+  });
